@@ -572,6 +572,28 @@ export default {
 			})
 		},
 		/**
+		 * Adds a category to the event
+		 *
+		 * @param {string} category Category to add
+		 */
+		addCategory(category) {
+			this.$store.commit('addCategory', {
+				calendarObjectInstance: this.calendarObjectInstance,
+				category,
+			})
+		},
+		/**
+		 * Removes a category from the event
+		 *
+		 * @param {string} category Category to remove
+		 */
+		removeCategory(category) {
+			this.$store.commit('removeCategory', {
+				calendarObjectInstance: this.calendarObjectInstance,
+				category,
+			})
+		},
+		/**
 		 * Updates the start date of this event
 		 *
 		 * @param {Date} startDate New start date

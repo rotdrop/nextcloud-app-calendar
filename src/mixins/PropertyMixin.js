@@ -82,6 +82,14 @@ export default {
 			type: Boolean,
 			default: true,
 		},
+		/**
+		 * Show the info tooltip if an info-text is available.
+		 * Will be shown by default.
+		 */
+		showInfo: {
+			type: Boolean,
+			default: true,
+		},
 	},
 	computed: {
 		/**
@@ -138,7 +146,7 @@ export default {
 		 * @return {boolean}
 		 */
 		hasInfo() {
-			return this.propModel.info !== undefined && !this.isReadOnly
+			return this.showInfo && this.propModel.info !== undefined && !this.isReadOnly
 		},
 	},
 }
