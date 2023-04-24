@@ -143,6 +143,14 @@
 					:value="description"
 					:linkify-links="true"
 					@update:value="updateDescription" />
+				<PropertySelectMultiple :colored-options="true"
+					:is-read-only="isReadOnly"
+					:prop-model="categoryOptions"
+					:value="categories"
+					:custom-label-heading="t('calendar', 'Custom Categories')"
+					:show-info="false"
+					@add-single-value="addCategory"
+					@remove-single-value="removeCategory" />
 
 				<InvitationResponseButtons v-if="isViewedByAttendee"
 					:attendee="userAsAttendee"
@@ -177,6 +185,7 @@ import PropertyTitleTimePicker
 	from '../components/Editor/Properties/PropertyTitleTimePicker.vue'
 import PropertyCalendarPicker
 	from '../components/Editor/Properties/PropertyCalendarPicker.vue'
+import PropertySelectMultiple from '../components/Editor/Properties/PropertySelectMultiple.vue'
 import PropertyText from '../components/Editor/Properties/PropertyText.vue'
 import SaveButtons from '../components/Editor/SaveButtons.vue'
 import PopoverLoadingIndicator
@@ -200,6 +209,7 @@ export default {
 		SaveButtons,
 		PropertyText,
 		PropertyCalendarPicker,
+		PropertySelectMultiple,
 		PropertyTitleTimePicker,
 		PropertyTitle,
 		IllustrationHeader,
@@ -220,9 +230,12 @@ export default {
 		EditorMixin,
 	],
 	computed: {
-	  ...mapState({
-		  hideEventExport: (state) => state.settings.hideEventExport,
-	  }),
+		...mapState({
+			hideEventExport: (state) => state.settings.hideEventExport,
+		}),
+		categories() {
+			return this.calendarObjectInstance?.categories || null
+		},
 	},
 	data() {
 		return {
