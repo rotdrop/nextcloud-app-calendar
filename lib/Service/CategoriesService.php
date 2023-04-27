@@ -33,6 +33,7 @@ use OCP\SystemTag\ISystemTag;
 use OCP\IDBConnection;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\Calendar\IManager as ICalendarManager;
+use OCP\Calendar\ICalendarQuery;
 use OCP\Calendar\ICalendar;
 
 class CategoriesService {
@@ -81,6 +82,7 @@ class CategoriesService {
 		if (empty($this->userId)) {
 			return [];
 		}
+		$principalUri = 'principals/users/' . $this->userId;
 		$calendars = $this->calendarManager->getCalendarsForPrincipal('principals/users/' . $this->userId);
 		$count = count($calendars);
 		if ($count === 0) {
@@ -88,7 +90,9 @@ class CategoriesService {
 		}
 
 		$categories = [];
-		$calendarObjects = $this->calendarManager->search('');
+		$query = $this->calendarManager->newQuery($principalUri);
+		$query->addSearchProperty(ICalendarQuery::SEARCH_PROPERTY_CATEGORIES);
+		$calendarObjects = $this->calendarManager->searchForPrincipal($query);
 		foreach ($calendarObjects as $objectInfo) {
 			foreach ($objectInfo['objects'] as $calendarObject) {
 				if (isset($calendarObject['CATEGORIES'])) {
