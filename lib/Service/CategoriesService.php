@@ -96,15 +96,14 @@ class CategoriesService {
 		foreach ($calendarObjects as $objectInfo) {
 			foreach ($objectInfo['objects'] as $calendarObject) {
 				if (isset($calendarObject['CATEGORIES'])) {
-					$eventCategories = explode(',', $calendarObject['CATEGORIES'][0][0]);
-					$categories = array_merge(
-						$categories,
-						array_fill_keys($eventCategories, true)
-					);
+					$categories[] = explode(',', $calendarObject['CATEGORIES'][0][0]);
 				}
 			}
 		}
-		$categories = array_filter(array_map(fn($label) => trim($label), array_keys($categories)));
+
+		// Avoid injecting "broken" categories into the UI (avoid empty
+		// categories and categories surrounded by spaces)
+		$categories = array_filter(array_map(fn($label) => trim($label), array_unique(array_merge(...$categories))));
 
 		return $categories;
 	}
