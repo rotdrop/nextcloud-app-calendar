@@ -7,6 +7,7 @@ import { showError, showSuccess } from '@nextcloud/dialogs'
 import { translate as t } from '@nextcloud/l10n'
 import { generateUrl } from '@nextcloud/router'
 import { useHotKey } from '@nextcloud/vue/composables/useHotKey'
+import { loadState } from '@nextcloud/initial-state'
 import { mapState, mapStores } from 'pinia'
 import { getRFCProperties } from '@/models/rfcProps.js'
 import { containsRoomUrl } from '@/services/talkService.ts'
@@ -364,6 +365,11 @@ export default {
 		 */
 		rfcProps() {
 			return getRFCProperties()
+		},
+		categoryOptions() {
+			const categories = { ...this.rfcProps.categories }
+			categories.options = loadState('calendar', 'categories')
+			return categories
 		},
 		/**
 		 * Returns whether or not this event can be downloaded from the server

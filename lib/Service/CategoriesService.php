@@ -4,7 +4,7 @@ declare(strict_types=1);
 /**
  * Calendar App
  *
- * @copyright 2023 Claus-Justus Heine <himself@claus-justus-heine.de>
+ * @copyright 2023, 2024 Claus-Justus Heine <himself@claus-justus-heine.de>
  *
  * @author Claus-Justus Heine <himself@claus-justus-heine.de>
  *
@@ -151,21 +151,31 @@ class CategoriesService {
 		$standardCategories = array_merge($systemTagCategoryLabels, $rfcCategoryLabels);
 		$customCategoryLabels = array_values(array_filter($this->getUsedCategories(), fn($label) => !in_array($label, $standardCategories)));
 
-		$categories = [
-			[
-				'group' => $this->l->t('Custom Categories'),
-				'options' => array_map(fn(string $label) => [ 'label' => $label, 'value' => $label ], $customCategoryLabels),
-			],
-			[
-				'group' => $this->l->t('Collaborative Tags'),
-				'options' => array_map(fn(string $label) => [ 'label' => $label, 'value' => $label ], $systemTagCategoryLabels),
-			],
-			[
-				'group' => $this->l->t('Standard Categories'),
-				'options' => array_map(fn(string $label) => [ 'label' => $label, 'value' => $label ], $rfcCategoryLabels),
-			],
-		];
+		// $categories = [
+		// 	[
+		// 		'group' => $this->l->t('Custom Categories'),
+		// 		'options' => array_map(fn(string $label) => [ 'label' => $label, 'value' => $label ], $customCategoryLabels),
+		// 	],
+		// 	[
+		// 		'group' => $this->l->t('Collaborative Tags'),
+		// 		'options' => array_map(fn(string $label) => [ 'label' => $label, 'value' => $label ], $systemTagCategoryLabels),
+		// 	],
+		// 	[
+		// 		'group' => $this->l->t('Standard Categories'),
+		// 		'options' => array_map(fn(string $label) => [ 'label' => $label, 'value' => $label ], $rfcCategoryLabels),
+		// 	],
+		// ];
 
+		// As VueSelect still does not support option groups, provide the
+		// options as flat arrays and leave it to Vue to style the headings
+		$categories = array_merge(
+			[ [ 'label' => $this->l->t('Custom Categories'), 'value' => null, 'isGroupHeading' => true, ], ],
+			array_map(fn(string $label) => [ 'label' => $label, 'value' => $label, 'isGroupHeading' => false, ], $customCategoryLabels),
+			[ [ 'label' => $this->l->t('Collaborative Tags'), 'value' => null, 'isGroupHeading' => true, ], ],
+			array_map(fn(string $label) => [ 'label' => $label, 'value' => $label, 'isGroupHeading' => false, ], $systemTagCategoryLabels),
+			[ [ 'label' => $this->l->t('Standard Categories'), 'value' => null, 'isGroupHeading' => true, ] ],
+			array_map(fn(string $label) => [ 'label' => $label, 'value' => $label, 'isGroupHeading' => false, ], $rfcCategoryLabels),
+		);
 
 		return $categories;
 	}
