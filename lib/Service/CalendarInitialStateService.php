@@ -11,6 +11,7 @@ namespace OCA\Calendar\Service;
 use OC\App\CompareVersion;
 use OCA\Calendar\Service\Appointments\AppointmentConfigService;
 use OCA\NotifyPush\Queue\IQueue;
+use OCA\Calendar\Service\CategoriesService;
 use OCP\App\IAppManager;
 use OCP\AppFramework\Services\IInitialState;
 use OCP\Calendar\Resource\IManager as IResourceManager;
@@ -30,6 +31,7 @@ class CalendarInitialStateService {
 		private IConfig $config,
 		private IAppConfig $appConfig,
 		private AppointmentConfigService $appointmentConfigService,
+		private CategoriesService $categoriesService,
 		private CompareVersion $compareVersion,
 		private ?string $userId,
 		private IResourceManager $resourceManager,
@@ -136,6 +138,7 @@ class CalendarInitialStateService {
 			$enableResourceBooking,
 		);
 		$this->initialStateService->provideInitialState('has_notify_push', $this->queue !== null);
+		$this->initialStateService->provideInitialState('categories', $this->categoriesService->getCategories());
 	}
 
 	/**
