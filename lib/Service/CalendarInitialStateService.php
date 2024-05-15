@@ -9,6 +9,7 @@ namespace OCA\Calendar\Service;
 
 use OC\App\CompareVersion;
 use OCA\Calendar\Service\Appointments\AppointmentConfigService;
+use OCA\Calendar\Service\CategoriesService;
 use OCP\App\IAppManager;
 use OCP\AppFramework\Services\IInitialState;
 use OCP\IConfig;
@@ -22,16 +23,10 @@ class CalendarInitialStateService {
 		private IAppManager $appManager,
 		private IConfig $config,
 		private AppointmentConfigService $appointmentConfigService,
+		private CategoriesService $categoriesService,
 		private CompareVersion $compareVersion,
 		private ?string $userId,
 	) {
-		$this->appName = $appName;
-		$this->config = $config;
-		$this->initialStateService = $initialStateService;
-		$this->appointmentConfigService = $appointmentConfigService;
-		$this->appManager = $appManager;
-		$this->compareVersion = $compareVersion;
-		$this->userId = $userId;
 	}
 
 	public function run(): void {
@@ -101,6 +96,7 @@ class CalendarInitialStateService {
 		$this->initialStateService->provideInitialState('show_resources', $showResources);
 		$this->initialStateService->provideInitialState('isCirclesEnabled', $isCirclesEnabled && $isCircleVersionCompatible);
 		$this->initialStateService->provideInitialState('publicCalendars', $publicCalendars);
+		$this->initialStateService->provideInitialState('categories', $this->categoriesService->getCategories());
 	}
 
 	/**
