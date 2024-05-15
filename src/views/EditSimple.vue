@@ -150,8 +150,9 @@
 
 					<PropertySelectMultiple	:is-read-only="isReadOnlyOrViewing"
 						:colored-options="true"
-						:prop-model="rfcProps.categories"
+						:prop-model="categoryOptions"
 						:value="categories"
+						:custom-label-heading="t('calendar', 'Custom Categories')"
 						@add-single-value="addCategory"
 						@remove-single-value="removeCategory" />
 
