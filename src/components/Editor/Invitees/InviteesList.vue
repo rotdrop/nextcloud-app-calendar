@@ -31,17 +31,17 @@
 			{{ statusHeader }}
 		</div>
 
-		<InviteesListSearch v-if="!isReadOnly && !isSharedWithMe && hasUserEmailAddress"
+		<InviteesListSearch v-if="!isReadOnly /* && !isSharedWithMe */ && hasUserEmailAddress"
 			:already-invited-emails="alreadyInvitedEmails"
 			:organizer="calendarObjectInstance.organizer"
 			@add-attendee="addAttendee" />
 		<OrganizerListItem v-if="hasOrganizer"
-			:is-read-only="isReadOnly || isSharedWithMe"
+			:is-read-only="isReadOnly /* || isSharedWithMe */"
 			:organizer="calendarObjectInstance.organizer" />
 		<InviteesListItem v-for="invitee in limitedInviteesWithoutOrganizer"
 			:key="invitee.email"
 			:attendee="invitee"
-			:is-read-only="isReadOnly || isSharedWithMe"
+			:is-read-only="isReadOnly /* || isSharedWithMe */"
 			:organizer-display-name="organizerDisplayName"
 			:members="invitee.members"
 			@remove-attendee="removeAttendee" />
@@ -49,7 +49,7 @@
 			class="invitees-list__more">
 			{{ n('calendar', '%n more guest', '%n more guests', inviteesWithoutOrganizer.length - limit) }}
 		</div>
-		<NoAttendeesView v-if="isReadOnly && isSharedWithMe && !hideErrors"
+		<NoAttendeesView v-if="isReadOnly /* && isSharedWithMe */ && !hideErrors"
 			:message="noOwnerMessage" />
 		<NoAttendeesView v-else-if="isReadOnly && isListEmpty && hasUserEmailAddress"
 			:message="noInviteesMessage" />
