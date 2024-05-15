@@ -224,7 +224,7 @@
 							class="property-categories"
 							:colored-options="true"
 							:is-read-only="isReadOnly"
-							:prop-model="rfcProps.categories"
+							:prop-model="categoryOptions"
 							:value="categories"
 							@add-single-value="addCategory"
 							@remove-single-value="removeCategory" />
