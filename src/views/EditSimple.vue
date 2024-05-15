@@ -162,7 +162,7 @@
 					<PropertySelectMultiple	class="property-categories"
 						:colored-options="true"
 						:is-read-only="isReadOnlyOrViewing"
-						:prop-model="rfcProps.categories"
+						:prop-model="categoryOptions"
 						:custom-label-heading="t('calendar', 'Custom Categories')"
 						:value="categories"
 						@add-single-value="addCategory"
