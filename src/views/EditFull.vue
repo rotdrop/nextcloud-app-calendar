@@ -233,7 +233,8 @@
 							class="property-categories"
 							:coloredOptions="true"
 							:isReadOnly="isReadOnly"
-							:propModel="rfcProps.categories"
+							:propModel="categoryOptions"
+							:customLabelHeading="t('calendar', 'Custom Categories')"
 							:value="categories"
 							@addSingleValue="addCategory"
 							@removeSingleValue="removeCategory" />
