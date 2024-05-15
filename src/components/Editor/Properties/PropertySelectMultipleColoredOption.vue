@@ -23,8 +23,9 @@
 
 <template>
 	<span class="property-select-multiple-colored-tag">
-		<div class="property-select-multiple-colored-tag__color-indicator" :style="{ 'background-color': color}" />
-		<span class="property-select-multiple-colored-tag__label">{{ label }}</span>
+		<div v-if="!isGroupLabel" class="property-select-multiple-colored-tag__color-indicator" :style="{ 'background-color': color }" />
+		<span v-if="!isGroupLabel" class="property-select-multiple-colored-tag__label">{{ label }}</span>
+		<span v-else class="property-select-multiple-colored-tag__group_label">{{ label }}</span>
 		<div v-if="closeable" class="icon icon-close" @click="deselect" />
 	</span>
 </template>
@@ -47,6 +48,9 @@ export default {
 	},
 	emits: ['deselect'],
 	computed: {
+		isGroupLabel() {
+			return typeof this.option !== 'string' && this.option.isGroupHeading
+		},
 		label() {
 			const option = this.option
 			logger.debug('Option render', { option })
