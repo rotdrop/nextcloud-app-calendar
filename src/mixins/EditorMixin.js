@@ -17,6 +17,7 @@ import useCalendarsStore from '../store/calendars.js'
 import useCalendarObjectsStore from '../store/calendarObjects.js'
 import useCalendarObjectInstanceStore from '../store/calendarObjectInstance.js'
 import { mapStores, mapState } from 'pinia'
+import { loadState } from '@nextcloud/initial-state'
 
 /**
  * This is a mixin for the editor. It contains common Vue stuff, that is
@@ -296,6 +297,11 @@ export default {
 		 */
 		rfcProps() {
 			return getRFCProperties()
+		},
+		categoryOptions() {
+			const categories = { ...this.rfcProps.categories }
+			categories.options = loadState('calendar', 'categories')
+			return categories
 		},
 		/**
 		 * Returns whether or not this event can be downloaded from the server

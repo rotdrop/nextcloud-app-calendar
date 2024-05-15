@@ -83,6 +83,10 @@ export default {
 			type: Boolean,
 			default: false,
 		},
+		customLabelHeading: {
+			type: String,
+			default: 'Custom Categories',
+		},
 	},
 	data() {
 		return {
@@ -95,6 +99,10 @@ export default {
 		},
 		options() {
 			const options = this.propModel.options.slice()
+			const customOptionsHeading = options.find(option => option.isGroupHeading && option.label === this.customLabelHeading)
+			if (!customOptionsHeading) {
+				options.push({ label: this.customLabelHeading, isGroupHeading: true, value: null })
+			}
 			for (const category of (this.selectionData ?? [])) {
 				if (options.find(option => option.value === category.value)) {
 					continue
@@ -104,6 +112,7 @@ export default {
 				options.push({
 					value: category.value,
 					label: category.label,
+					isGroupHeading: false,
 				})
 			}
 
@@ -121,14 +130,25 @@ export default {
 				}
 			}
 
-			return options
-				.sort((a, b) => {
+			const groupHeadingIndices = options.reduce((acc, el, i) => el.isGroupHeading ? [...acc, i] : acc, [])
+			groupHeadingIndices.push(options.length)
+			let start = groupHeadingIndices.shift() // should be 0
+			const sorted = []
+			for (const index of groupHeadingIndices) {
+				const slice = options.slice(start + 1, index)
+				slice.sort((a, b) => {
 					return a.label.localeCompare(
 						b.label,
 						getLocale().replace('_', '-'),
 						{ sensitivity: 'base' },
 					)
 				})
+				sorted.push(options[start])
+				sorted.splice(start + 1, 0, ...slice)
+				start = index
+			}
+
+			return sorted
 		},
 	},
 	created() {
