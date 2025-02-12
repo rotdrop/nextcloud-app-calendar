@@ -133,6 +133,13 @@
 						:is-description="true"
 						@update:value="updateDescription" />
 
+					<PropertySelectMultiple	:is-read-only="isReadOnlyOrViewing"
+						:colored-options="true"
+						:prop-model="rfcProps.categories"
+						:value="categories"
+						@add-single-value="addCategory"
+						@remove-single-value="removeCategory" />
+
 					<InviteesList class="event-popover__invitees"
 						:hide-buttons="true"
 						:hide-errors="true"
@@ -192,6 +199,7 @@ import EditorMixin from '../mixins/EditorMixin.js'
 import PropertyTitle from '../components/Editor/Properties/PropertyTitle.vue'
 import PropertyTitleTimePicker
 	from '../components/Editor/Properties/PropertyTitleTimePicker.vue'
+import PropertySelectMultiple from '../components/Editor/Properties/PropertySelectMultiple.vue'
 import PropertyText from '../components/Editor/Properties/PropertyText.vue'
 import SaveButtons from '../components/Editor/SaveButtons.vue'
 import PopoverLoadingIndicator
@@ -221,6 +229,7 @@ export default {
 		SaveButtons,
 		PropertyText,
 		PropertyTitleTimePicker,
+		PropertySelectMultiple,
 		PropertyTitle,
 		NcPopover,
 		Actions,
@@ -305,6 +314,10 @@ export default {
 			}
 
 			return this.title
+		},
+
+		categories() {
+			return this.calendarObjectInstance?.categories || null
 		},
 	},
 	watch: {
