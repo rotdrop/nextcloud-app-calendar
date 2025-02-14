@@ -20,6 +20,7 @@
 			:auto-hide="false"
 			:placement="placement"
 			:boundary="boundaryElement"
+			:focus-trap="enableFocusTrap"
 			popover-base-class="event-popover"
 			:triggers="[]">
 			<template #trigger="{ attrs }">
@@ -312,6 +313,10 @@ export default {
 			'widgetEventDetails',
 			'widgetRef',
 		]),
+
+		enableFocusTrap() {
+			return !this.isLoading || this.isSaving
+		},
 
 		showPopover() {
 			return this.isVisible || this.widgetEventDetailsOpen
