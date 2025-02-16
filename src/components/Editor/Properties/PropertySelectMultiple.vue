@@ -151,15 +151,25 @@ export default {
 			return sorted
 		},
 	},
-	created() {
-		for (const category of this.value) {
-			// Create and select pseudo option if is not yet known
-			const option = this.options.find(option => option.value === category)
-				?? { label: category, value: category }
-			this.selectionData.push(option)
+	watch: {
+		value() {
+			this.updateSelectionData()
 		}
 	},
+	created() {
+		this.updateSelectionData()
+	},
 	methods: {
+		updateSelectionData() {
+			for (const category of this.value) {
+				// Create and select pseudo option if is not yet known
+				const option = this.options.find(option => option.value === category)
+							?? { label: category, value: category }
+				if (this.selectionData.findIndex(option => option.value === category) === -1) {
+					this.selectionData.push(option)
+				}
+			}
+		},
 		unselectValue(value) {
 			if (!value) {
 				return
