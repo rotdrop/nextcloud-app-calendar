@@ -390,7 +390,7 @@ export default {
 		/**
 		 * Closes the editor and returns to normal calendar-view
 		 */
-		closeEditor() {
+		async closeEditor() {
 			if (this.isWidget) {
 				this.calendarsStore.closeWidgetEventDetails()
 				return
@@ -399,10 +399,14 @@ export default {
 			delete params.object
 			delete params.recurrenceId
 
-			this.$router.push({
-				name: getPrefixedRoute(this.$route.name, 'CalendarView'),
-				params,
-			})
+			try {
+				await this.$router.push({
+					name: getPrefixedRoute(this.$route.name, 'CalendarView'),
+					params,
+				})
+			} catch (error) {
+				console.error('Caught an error returning to the base view', error)
+			}
 
 			this.calendarObjectInstanceStore.resetCalendarObjectInstanceObjectIdAndRecurrenceId()
 		},
@@ -757,10 +761,39 @@ export default {
 				const start = parseInt(to.params.dtstart, 10)
 				const end = parseInt(to.params.dtend, 10)
 				const timezoneId = vm.settingsStore.getResolvedTimezone
+				let context
+				try {
+					context = JSON.parse(atob(to.params.context))
+				} catch (error) {
+					if (to.params.context) {
+						console.error('Unable to decode given context parameter', to.params.context)
+					}
+					context = {}
+				}
 
 				try {
 					await vm.loadingCalendars()
 					await vm.calendarObjectInstanceStore.getCalendarObjectInstanceForNewEvent({ isAllDay, start, end, timezoneId })
+
+					const categories = [...new Set([...(context.categories || [])])]
+					for (const category of categories) {
+						vm.calendarObjectInstanceStore.addCategory({
+							calendarObjectInstance: vm.calendarObjectInstance,
+							category,
+						})
+					}
+					if (context.title) {
+						vm.calendarObjectInstanceStore.changeTitle({
+							calendarObjectInstance: vm.calendarObjectInstance,
+							title: context.title,
+						})
+					}
+					if (context.calendarId) {
+						if (!vm.calendarsStore.getCalendarById(context.calendarId)) {
+							throw Error(`Calendar does not exist: ${context.calendarId} (${atob(context.calendarId)})`)
+						}
+						vm.calendarObject.calendarId = context.calendarId
+					}
 					vm.calendarId = vm.calendarObject.calendarId
 				} catch (error) {
 					console.debug(error)
@@ -775,6 +808,15 @@ export default {
 				vm.resetState()
 				const objectId = to.params.object
 				const recurrenceId = to.params.recurrenceId
+				let context
+				try {
+					context = JSON.parse(atob(to.params.context))
+				} catch (error) {
+					if (to.params.context) {
+						console.error('Unable to decode given context parameter', to.params.context)
+					}
+					context = {}
+				}
 
 				if (recurrenceId === 'next') {
 					const closeToDate = dateFactory()
