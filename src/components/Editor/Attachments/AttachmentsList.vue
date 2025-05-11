@@ -164,7 +164,13 @@ export default {
 				})
 				.build()
 			try {
-				const filename = await picker.pick(t('calendar', 'Choose a file to share as a link'))
+				let filename = await picker.pick(t('calendar', 'Choose a file to share as a link'))
+				if (Array.isArray(filename)) {
+					if (filename.length !== 1) {
+						throw Error('Unexpected file-picker result', { filename })
+					}
+					filename = filename[0]
+				}
 				if (!this.isDuplicateAttachment(filename)) {
 					// TODO do not share Move this to PHP
 					const data = await getFileInfo(filename, this.currentUser.dav.userId)
