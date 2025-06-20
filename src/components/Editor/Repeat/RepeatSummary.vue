@@ -4,7 +4,7 @@
 -->
 
 <template>
-	<span v-if="display">
+	<span v-if="display" :title="formattedRecurrenceRule">
 		{{ formattedRecurrenceRule }}
 	</span>
 	<span v-else>
