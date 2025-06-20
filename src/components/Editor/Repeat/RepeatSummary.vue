@@ -4,8 +4,8 @@
 -->
 
 <template>
-	<span v-if="display">
-		{{ recurrenceRule | formatRecurrenceRule(locale) }}
+	<span v-if="display" :title="summary">
+		{{ summary }}
 	</span>
 	<span v-else>
 		{{ $t('calendar', 'Does not repeat') }}
@@ -44,6 +44,9 @@ export default {
 		display() {
 			return this.recurrenceRule.frequency !== 'NONE'
 		},
+		summary() {
+			return this.display ? formatRecurrenceRule(this.recurrenceRule, this.locale) : ''
+		}
 	},
 }
 </script>
