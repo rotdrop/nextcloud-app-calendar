@@ -836,7 +836,7 @@ export default {
 .event-popover .event-popover__inner {
 	display: flex;
 	flex-direction: column;
-	max-height: 90vh;
+	max-height: calc(100vh - 3 * var(--default-grid-baseline) - 50px);
 	box-sizing: border-box;
 	padding-inline-start: calc(var(--default-grid-baseline) * 4);
 	padding-inline-end: calc(var(--default-grid-baseline) * 2);
