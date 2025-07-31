@@ -502,7 +502,7 @@ export default {
 .event-popover__inner {
 	width: unset !important;
 	min-width: 500px !important;
-	max-height: 100vh !important;
+	max-height: calc(100vh - 3 * var(--default-grid-baseline) - 50px) !important;
 	overflow-y: auto !important;
 }
 
