@@ -503,7 +503,7 @@ export default {
 .event-popover__inner {
 	width: unset !important;
 	min-width: 500px !important;
-	max-height: 90vh !important; // leaving some margin makes scrolling easier and ensures elements aren't cut off
+	max-height: calc(100vh - 3 * var(--default-grid-baseline) - 50px) !important;
 	overflow-y: auto !important;
 }
 
