@@ -15,6 +15,7 @@ export function removeMailtoPrefix(uri) {
 	}
 
 	if (uri.startsWith('mailto:')) {
+		uri = uri.replace('%2b', '+')
 		return uri.slice(7)
 	}
 
@@ -35,6 +36,8 @@ export function addMailtoPrefix(uri) {
 	if (uri.startsWith('mailto:')) {
 		return uri
 	}
+
+	uri = uri.replace('+', '%2b')
 
 	return `mailto:${uri}`
 }
