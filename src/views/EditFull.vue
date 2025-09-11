@@ -938,7 +938,7 @@ export default {
 	justify-content: space-between;
 	flex-wrap: wrap;
 
-	&__right {
+	&__right ::v-deep {
 		width: calc(var(--total-width) * 1 / 3 - var(--column-gap) / 2);
 		display: flex;
 		flex-direction: column;
