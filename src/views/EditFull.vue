@@ -926,18 +926,24 @@ export default {
 		flex-direction: column;
 		gap: calc(var(--default-grid-baseline) * 4);
 
-		.multiselect__tag {
+		:deep(.property-select__input) {
+			max-width: calc(var(--total-width) * 1 / 3 - var(--column-gap) / 2 - 36px);
+			display: flex;
+			align-items: center;
+		}
+
+		:deep(.multiselect__tag) {
 			padding: var(--default-grid-baseline);
 			border-radius: var(--border-radius-element);
 		}
 
-		.property-select-multiple-colored-tag__color-indicator {
+		:deep(.property-select-multiple-colored-tag__color-indicator) {
 			width: 12px;
 			height: 12px;
 			border-radius: 50%;
 		}
 
-		.property-color__icon--hidden {
+		:deep(.property-color__icon--hidden) {
 			visibility: hidden;
 		}
 	}
