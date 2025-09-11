@@ -820,6 +820,26 @@ export default {
 			})
 		},
 		/**
+		 * Adds a category to the event
+		 *
+		 * @param {string} category Category to add
+		 */
+		addCategory(category) {
+			this.calendarObjectInstanceStore.addCategory({
+				category,
+			})
+		},
+		/**
+		 * Removes a category from the event
+		 *
+		 * @param {string} category Category to remove
+		 */
+		removeCategory(category) {
+			this.calendarObjectInstanceStore.removeCategory({
+				category,
+			})
+		},
+		/**
 		 * Updates the start date of this event
 		 *
 		 * @param {Date} startDate New start date

@@ -621,28 +621,6 @@ export default {
 		},
 
 		/**
-		 * Adds a category to the event
-		 *
-		 * @param {string} category Category to add
-		 */
-		addCategory(category) {
-			this.calendarObjectInstanceStore.addCategory({
-				category,
-			})
-		},
-
-		/**
-		 * Removes a category from the event
-		 *
-		 * @param {string} category Category to remove
-		 */
-		removeCategory(category) {
-			this.calendarObjectInstanceStore.removeCategory({
-				category,
-			})
-		},
-
-		/**
 		 * Updates the color of the event
 		 *
 		 * @param {string} customColor The new color
