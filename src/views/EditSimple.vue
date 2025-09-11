@@ -919,7 +919,7 @@ export default {
 	align-items: center;
 }
 
-.property-select-multiple {
+:deep(.property-select-multiple) {
     .property-select-multiple__input.property-select-multiple__input--readonly {
         width: 100%;
 
@@ -944,7 +944,7 @@ export default {
     }
 }
 
-.property-categories {
+:deep(.property-categories) {
     .property-select__input {
        max-width: calc(var(--total-width) * 1 / 3 - var(--column-gap) / 2 - 36px);
        display: flex;
