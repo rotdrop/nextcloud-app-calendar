@@ -219,6 +219,15 @@
 							:calendarId="calendarId"
 							@close="closeEditorAndSkipAction" />
 
+						<PropertySelectMultiple
+							class="property-categories"
+							:colored-options="true"
+							:is-read-only="isReadOnly"
+							:prop-model="rfcProps.categories"
+							:value="categories"
+							@add-single-value="addCategory"
+							@remove-single-value="removeCategory" />
+
 						<div v-if="isReadOnlyOrViewing && hasAlarms" class="property-alarm-wrapper">
 							<Bell :size="20" class="property-alarm-icon" />
 							<AlarmList
@@ -301,6 +310,7 @@ import PropertyText from '../components/Editor/Properties/PropertyText.vue'
 import PropertyTitle from '../components/Editor/Properties/PropertyTitle.vue'
 import PropertyTitleTimePicker
 	from '../components/Editor/Properties/PropertyTitleTimePicker.vue'
+import PropertySelectMultiple from '../components/Editor/Properties/PropertySelectMultiple.vue'
 import SaveButtons from '../components/Editor/SaveButtons.vue'
 import EditorMixin from '../mixins/EditorMixin.js'
 import useCalendarObjectInstanceStore from '../store/calendarObjectInstance.js'
@@ -315,6 +325,7 @@ export default {
 		SaveButtons,
 		PropertyText,
 		PropertyTitleTimePicker,
+		PropertySelectMultiple,
 		PropertyTitle,
 		NcPopover,
 		Actions,
@@ -426,6 +437,10 @@ export default {
 			}
 
 			return this.title
+		},
+
+		categories() {
+			return this.calendarObjectInstance?.categories || null
 		},
 	},
 
@@ -1004,4 +1019,51 @@ export default {
 :deep(.checkbox-content__icon) {
 	margin-block: 0 !important;
 }
+.property-select-multiple {
+    .property-select-multiple__input.property-select-multiple__input--readonly {
+        width: 100%;
+
+        .property-select-multiple-colored-tag-wrapper {
+            align-items: center;
+            overflow: hidden;
+            max-width: 100%;
+            position: relative;
+            padding: 3px 5px;
+
+            .multiselect__tag {
+                line-height: 20px;
+                padding: 1px 5px;
+                background-image: none;
+                display: inline-flex;
+                align-items: center;
+                border-radius: 3px;
+                max-width: fit-content;
+                margin: 3px;
+            }
+        }
+    }
+}
+
+.property-categories {
+    .property-select__input {
+       max-width: calc(var(--total-width) * 1 / 3 - var(--column-gap) / 2 - 36px);
+       display: flex;
+       align-items: center;
+    }
+    .property-select-multiple-colored-tag {
+       display: flex;
+       align-content: center;
+       align-items: center;
+       gap: var(--default-grid-baseline);
+       .property-select-multiple-colored-tag__color-indicator {
+           width: 12px;
+           height: 12px;
+           border-radius: 50%;
+       }
+    }
+    .property-color__icon--hidden {
+       visibility: hidden;
+    }
+}
+
 </style>
