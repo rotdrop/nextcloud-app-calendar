@@ -942,18 +942,18 @@ export default {
 			align-items: center;
 		}
 
-		.multiselect__tag {
+		:deep(.multiselect__tag) {
 			padding: var(--default-grid-baseline);
 			border-radius: var(--border-radius-element);
 		}
 
-		.property-select-multiple-colored-tag__color-indicator {
+		:deep(.property-select-multiple-colored-tag__color-indicator) {
 			width: 12px;
 			height: 12px;
 			border-radius: 50%;
 		}
 
-		.property-color__icon--hidden {
+		:deep(.property-color__icon--hidden) {
 			visibility: hidden;
 		}
 	}
