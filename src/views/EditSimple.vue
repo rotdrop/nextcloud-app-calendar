@@ -182,7 +182,7 @@
 							:hide-buttons="true"
 							:hide-errors="true"
 							:show-header="true"
-							:is-read-only="isReadOnlyOrViewing || isViewedByOrganizer === false"
+							:is-read-only="isReadOnlyOrViewing/* || isViewedByOrganizer === false */"
 							:is-shared-with-me="isSharedWithMe"
 							:calendar="selectedCalendar"
 							:calendar-object-instance="calendarObjectInstance" />
