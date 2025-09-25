@@ -1,0 +1,13 @@
+diff --git a/node_modules/@nextcloud/calendar-js/dist/index.mjs b/node_modules/@nextcloud/calendar-js/dist/index.mjs
+index 17ff8ee..803d206 100644
+--- a/node_modules/@nextcloud/calendar-js/dist/index.mjs
++++ b/node_modules/@nextcloud/calendar-js/dist/index.mjs
+@@ -4693,7 +4693,7 @@ class RecurrenceManager {
+       for (const valueToCheck of property.getValueIterator()) {
+         if (value === valueToCheck) {
+           const allValues = property.value;
+-          if (allValues.length === 1) {
++          if (!Array.isArray(allValues) || allValues.length === 1) {
+             this.masterItem.deleteProperty(property);
+             continue;
+           }
