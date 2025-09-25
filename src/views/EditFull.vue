@@ -318,7 +318,7 @@
 						<InviteesList
 							v-if="!isLoading"
 							:calendar="selectedCalendar"
-							:isReadOnly="isReadOnly || isViewedByOrganizer === false"
+							:isReadOnly="isReadOnly/* || isViewedByOrganizer === false */"
 							:isSharedWithMe="isSharedWithMe"
 							:showHeader="true"
 							@updateDates="updateDates" />
