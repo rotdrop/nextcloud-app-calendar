@@ -318,7 +318,7 @@
 							v-if="!isLoading"
 							:calendar="selectedCalendar"
 							:calendarObjectInstance="calendarObjectInstance"
-							:isReadOnly="isReadOnly || isViewedByOrganizer === false"
+							:isReadOnly="isReadOnly/* || isViewedByOrganizer === false */"
 							:isSharedWithMe="isSharedWithMe"
 							:showHeader="true"
 							@updateDates="updateDates" />
