@@ -1082,3 +1082,25 @@ export default {
 	border-radius: var(--border-radius);
 }
 </style>
+
+<style lang="scss">
+// for the drop-down which resides out of the scoped space
+.vs__dropdown-menu .vs__dropdown-option {
+    .property-select-multiple-colored-tag {
+        display: flex;
+        align-content: center;
+        align-items: center;
+        gap: var(--default-grid-baseline);
+        .property-select-multiple-colored-tag__group_label {
+            font-weight: bold;
+            margin-left: -12px;
+            font-style: italic;
+        }
+        .property-select-multiple-colored-tag__color-indicator {
+	    width: 12px;
+	    height: 12px;
+	    border-radius: 50%;
+        }
+    }
+}
+</style>
