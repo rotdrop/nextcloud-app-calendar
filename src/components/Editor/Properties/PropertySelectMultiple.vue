@@ -24,6 +24,7 @@
 				:placeholder="placeholder"
 				:name="readableName"
 				:multiple="true"
+				:selectable="isSelectable"
 				:taggable="true"
 				:noWrap="false"
 				:deselectFromDropdown="false"
@@ -165,6 +166,9 @@ export default {
 	},
 
 	methods: {
+		isSelectable(option) {
+			return !option.isGroupHeading
+		},
 		updateSelectionData() {
 			for (const category of this.value) {
 				// Create and select pseudo option if is not yet known
