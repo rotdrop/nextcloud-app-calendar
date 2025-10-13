@@ -194,6 +194,25 @@
 							@updateDescription="updateDescription" />
 
 						<PropertyText
+							:isReadOnly="isReadOnlyOrViewing/* || isViewedByOrganizer === false */"
+							:propModel="rfcProps.location"
+							:value="location"
+							:linkifyLinks="true"
+							@update:value="updateLocation">
+							<template #right>
+								<Actions v-if="!isLoading && !isError && hasMapsURL" :force-menu="true">
+									<ActionLink
+										:href="mapsURL"
+										target="calendar-maps">
+										<template #icon>
+											<MapMarker :size="20" decorative />
+										</template>
+										{{ $t('calendar', 'Open in Maps') }}
+									</ActionLink>
+								</Actions>
+							</template>
+						</PropertyText>
+						<PropertyText
 							:isReadOnly="isReadOnlyOrViewing"
 							:propModel="rfcProps.description"
 							:value="description"
@@ -294,6 +313,7 @@ import Bell from 'vue-material-design-icons/BellOutline.vue'
 import CalendarBlank from 'vue-material-design-icons/CalendarBlankOutline.vue'
 import Close from 'vue-material-design-icons/Close.vue'
 import ContentCopy from 'vue-material-design-icons/ContentCopy.vue'
+import MapMarker from 'vue-material-design-icons/MapMarker.vue'
 import ContentDuplicate from 'vue-material-design-icons/ContentDuplicate.vue'
 import HelpCircleIcon from 'vue-material-design-icons/HelpCircleOutline.vue'
 import EditIcon from 'vue-material-design-icons/PencilOutline.vue'
@@ -338,6 +358,7 @@ export default {
 		CalendarBlank,
 		Close,
 		Download,
+		MapMarker,
 		ContentDuplicate,
 		ContentCopy,
 		Delete,
