@@ -431,6 +431,17 @@ export default {
 		isCreateTalkRoomButtonVisible() {
 			return this.talkEnabled && this.isViewedByOrganizer !== false && this.isReadOnly !== true
 		},
+
+		hasMapsURL() {
+			return this.location !== null
+		},
+
+		mapsURL() {
+			if (!this.hasMapsURL) {
+				return null
+			}
+			return generateUrl('/apps/maps?search=' + encodeURIComponent(this.location));
+		},
 	},
 
 	async created() {
