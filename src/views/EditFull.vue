@@ -173,7 +173,20 @@
 							:prop-model="rfcProps.location"
 							:value="location"
 							:linkify-links="true"
-							@update:value="updateLocation" />
+							@update:value="updateLocation">
+							<template #right>
+								<NcActions v-if="!isLoading && !isError && hasMapsURL" :force-menu="true">
+									<NcActionLink
+										:href="mapsURL"
+										target="calendar-maps">
+										<template #icon>
+											<MapMarker :size="20" decorative />
+										</template>
+										{{ $t('calendar', 'Open in Maps') }}
+									</NcActionLink>
+								</NcActions>
+							</template>
+						</PropertyText>
 						<PropertyText
 							class="property-description"
 							:is-read-only="isReadOnly"
@@ -351,6 +364,7 @@ import {
 import { mapState, mapStores } from 'pinia'
 import CalendarBlank from 'vue-material-design-icons/CalendarBlank.vue'
 import Close from 'vue-material-design-icons/Close.vue'
+import MapMarker from 'vue-material-design-icons/MapMarker.vue'
 import ContentDuplicate from 'vue-material-design-icons/ContentDuplicate.vue'
 import HelpCircleIcon from 'vue-material-design-icons/HelpCircleOutline.vue'
 import Delete from 'vue-material-design-icons/TrashCanOutline.vue'

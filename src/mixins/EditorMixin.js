@@ -6,6 +6,7 @@
 import { showError } from '@nextcloud/dialogs'
 import { translate as t } from '@nextcloud/l10n'
 import { loadState } from '@nextcloud/initial-state'
+import { generateUrl } from '@nextcloud/router'
 import { mapState, mapStores } from 'pinia'
 import { getRFCProperties } from '../models/rfcProps.js'
 import useCalendarObjectInstanceStore from '../store/calendarObjectInstance.js'
@@ -380,6 +381,15 @@ export default {
 			}
 
 			return false
+		},
+		hasMapsURL() {
+			return this.location !== null
+		},
+		mapsURL() {
+			if (!this.hasMapsURL) {
+				return null
+			}
+			return generateUrl('/apps/maps?search=' + encodeURIComponent(this.location));
 		},
 	},
 	methods: {
