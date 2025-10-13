@@ -158,7 +158,20 @@
 							:prop-model="rfcProps.location"
 							:value="location"
 							:linkify-links="true"
-							@update:value="updateLocation" />
+							@update:value="updateLocation">
+							<template #right>
+								<Actions v-if="!isLoading && !isError && hasMapsURL" :force-menu="true">
+									<ActionLink
+										:href="mapsURL"
+										target="calendar-maps">
+										<template #icon>
+											<MapMarker :size="20" decorative />
+										</template>
+										{{ $t('calendar', 'Open in Maps') }}
+									</ActionLink>
+								</Actions>
+							</template>
+						</PropertyText>
 						<PropertyText class="property-description"
 							:is-read-only="isReadOnly"
 							:prop-model="rfcProps.description"
@@ -328,6 +341,7 @@ import CalendarPickerHeader from '../components/Editor/CalendarPickerHeader.vue'
 import CalendarBlank from 'vue-material-design-icons/CalendarBlank.vue'
 import Delete from 'vue-material-design-icons/TrashCanOutline.vue'
 import Download from 'vue-material-design-icons/TrayArrowDown.vue'
+import MapMarker from 'vue-material-design-icons/MapMarker.vue'
 import ContentDuplicate from 'vue-material-design-icons/ContentDuplicate.vue'
 
 import { shareFile } from '../services/attachmentService.js'

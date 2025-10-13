@@ -19,6 +19,7 @@ import useCalendarObjectsStore from '../store/calendarObjects.js'
 import useCalendarObjectInstanceStore from '../store/calendarObjectInstance.js'
 import { mapStores, mapState } from 'pinia'
 import { loadState } from '@nextcloud/initial-state'
+import { generateUrl } from '@nextcloud/router'
 
 /**
  * This is a mixin for the editor. It contains common Vue stuff, that is
@@ -380,6 +381,15 @@ export default {
 			}
 
 			return false
+		},
+		hasMapsURL() {
+			return this.location !== null
+		},
+		mapsURL() {
+			if (!this.hasMapsURL) {
+				return null
+			}
+			return generateUrl('/apps/maps?search=' + encodeURIComponent(this.location));
 		},
 	},
 	methods: {
