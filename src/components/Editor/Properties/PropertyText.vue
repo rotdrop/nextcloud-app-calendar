@@ -34,6 +34,9 @@
 				:style="{ 'min-height': linkifyMinHeight }"
 				@click="handleShowTextarea" />
 		</div>
+    <div v-if="$slots.right">
+       <slot name="right"/>
+		</div>
 	</div>
 </template>
 
