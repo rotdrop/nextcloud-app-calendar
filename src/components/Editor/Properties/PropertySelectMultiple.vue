@@ -32,7 +32,9 @@
 				:inputId="readableName + '-select-multiple-input'"
 				:ariaLabelCombobox="readableName"
 				:ariaLabelListbox="readableName"
+				:loading="isLoadingSuggestions"
 				label="label"
+				@search="searchOptions"
 				@option:selecting="tag"
 				@option:deselected="unselectValue">
 				<template v-if="coloredOptions" #option="scope">
@@ -54,12 +56,16 @@
 </template>
 
 <script>
-import { getLocale } from '@nextcloud/l10n'
+import { showError } from '@nextcloud/dialogs'
+import { getLocale, translate as t } from '@nextcloud/l10n'
 import { NcSelect } from '@nextcloud/vue'
+import debounce from 'debounce'
 import InformationVariant from 'vue-material-design-icons/InformationVariant.vue'
 import PropertySelectMultipleColoredOption from '@/components/Editor/Properties/PropertySelectMultipleColoredOption.vue'
 import PropertySelectMultipleColoredTag from '@/components/Editor/Properties/PropertySelectMultipleColoredTag.vue'
 import PropertyMixin from '@/mixins/PropertyMixin.js'
+import { searchCategories } from '@/services/categoryService.ts'
+import logger from '@/utils/logger.js'
 
 export default {
 	name: 'PropertySelectMultiple',
@@ -80,9 +86,15 @@ export default {
 			type: Boolean,
 			default: false,
 		},
+
 		customLabelHeading: {
 			type: String,
 			default: 'Custom Categories',
+		},
+
+		collaborativeLabelHeading: {
+			type: String,
+			default: 'Collaborative Tags',
 		},
 	},
 
@@ -92,6 +104,12 @@ export default {
 		return {
 			selectionData: [],
 			customLabelBuffer: [],
+			remoteOptions: [],
+			searchQuery: '',
+			searchRequestId: 0,
+			isLoadingSuggestions: false,
+			debouncedSearch: null,
+			searchAbortController: null,
 		}
 	},
 
@@ -101,84 +119,108 @@ export default {
 		},
 
 		options() {
-			const options = this.propModel.options.slice()
-			const customOptionsHeading = options.find(option => option.isGroupHeading && option.label === this.customLabelHeading)
-			if (!customOptionsHeading) {
+			const options = []
+			const customOptions = this.remoteOptions.filter((option) => option.source === 'custom')
+			const collaborativeOptions = this.remoteOptions.filter((option) => option.source === 'collaborative')
+			const sortOptions = (items) => items.sort((a, b) => a.label.localeCompare(
+				b.label,
+				getLocale().replace('_', '-'),
+				{ sensitivity: 'base' },
+			))
+			if (customOptions.length > 0) {
 				options.push({ label: this.customLabelHeading, isGroupHeading: true, value: null })
+				options.push(...sortOptions(customOptions))
 			}
-			for (const category of (this.selectionData ?? [])) {
-				if (options.find((option) => option.value === category.value)) {
-					continue
-				}
-
-				// Add pseudo options for unknown values
-				options.push({
-					value: category.value,
-					label: category.label,
-					isGroupHeading: false,
-				})
+			if (collaborativeOptions.length > 0) {
+				options.push({ label: this.collaborativeLabelHeading, isGroupHeading: true, value: null })
+				options.push(...sortOptions(collaborativeOptions))
 			}
+			options.push(...this.propModel.options)
 
-			for (const category of this.value) {
-				if (!options.find((option) => option.value === category) && category !== undefined) {
-					options.splice(options.findIndex((options) => options.value === category), 1)
+			for (const category of this.selectionData) {
+				if (!options.some((option) => option.value === category.value)) {
+					options.push(category)
 				}
 			}
-
-			if (this.customLabelBuffer) {
-				for (const category of this.customLabelBuffer) {
-					if (!options.find((option) => option.value === category.value)) {
-						options.push(category)
-					}
+			for (const category of this.customLabelBuffer) {
+				if (!options.some((option) => option.value === category.value)) {
+					options.push(category)
 				}
 			}
 
-			const groupHeadingIndices = options.reduce((acc, el, i) => el.isGroupHeading ? [...acc, i] : acc, [])
-			groupHeadingIndices.push(options.length)
-			let start = groupHeadingIndices.shift() // should be 0
-			const sorted = []
-			for (const index of groupHeadingIndices) {
-				const slice = options.slice(start + 1, index)
-				slice.sort((a, b) => {
-					return a.label.localeCompare(
-						b.label,
-						getLocale().replace('_', '-'),
-						{ sensitivity: 'base' },
-					)
-				})
-				sorted.push(options[start])
-				sorted.splice(start + 1, 0, ...slice)
-				start = index
-			}
-
-			return sorted
+			return options
 		},
 	},
 
 	watch: {
 		value() {
 			this.updateSelectionData()
-		}
+		},
 	},
 
 	created() {
 		this.updateSelectionData()
+		this.debouncedSearch = debounce(this.loadCategorySuggestions, 300)
+	},
+
+	beforeUnmount() {
+		this.debouncedSearch.clear()
+		this.searchAbortController?.abort()
+		this.searchRequestId++
 	},
 
 	methods: {
+		searchOptions(query) {
+			this.searchAbortController?.abort()
+			this.searchAbortController = null
+			this.searchQuery = query.trim()
+			this.searchRequestId++
+			this.remoteOptions = []
+			this.isLoadingSuggestions = false
+			this.debouncedSearch.clear()
+
+			if (this.searchQuery.length >= 2) {
+				this.debouncedSearch(this.searchQuery, this.searchRequestId)
+			}
+		},
+
+		async loadCategorySuggestions(query, requestId) {
+			const abortController = new AbortController()
+			this.searchAbortController = abortController
+			this.isLoadingSuggestions = true
+			try {
+				const options = await searchCategories(query, abortController.signal)
+				if (requestId === this.searchRequestId && query === this.searchQuery) {
+					this.remoteOptions = options
+				}
+			} catch (error) {
+				if (requestId === this.searchRequestId && !abortController.signal.aborted) {
+					logger.error('Could not load category suggestions', { error })
+					showError(t('calendar', 'Could not load category suggestions'))
+				}
+			} finally {
+				if (requestId === this.searchRequestId) {
+					this.isLoadingSuggestions = false
+					this.searchAbortController = null
+				}
+			}
+		},
+
 		isSelectable(option) {
 			return !option.isGroupHeading
 		},
+
 		updateSelectionData() {
 			for (const category of this.value) {
 				// Create and select pseudo option if is not yet known
-				const option = this.options.find(option => option.value === category)
-							?? { label: category, value: category }
-				if (this.selectionData.findIndex(option => option.value === category) === -1) {
+				const option = this.options.find((option) => option.value === category)
+					?? { label: category, value: category }
+				if (this.selectionData.findIndex((option) => option.value === category) === -1) {
 					this.selectionData.push(option)
 				}
 			}
 		},
+
 		unselectValue(value) {
 			if (!value) {
 				return

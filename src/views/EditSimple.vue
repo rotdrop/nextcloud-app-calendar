@@ -251,7 +251,9 @@
 							class="property-categories"
 							:colored-options="true"
 							:is-read-only="isReadOnly"
-							:prop-model="categoryOptions"
+							:prop-model="rfcProps.categories"
+							:customLabelHeading="t('calendar', 'Custom Categories')"
+							:collaborativeLabelHeading="t('calendar', 'Collaborative Tags')"
 							:value="categories"
 							@add-single-value="addCategory"
 							@remove-single-value="removeCategory" />

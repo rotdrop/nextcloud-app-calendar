@@ -2,181 +2,143 @@
 
 declare(strict_types=1);
 /**
- * Calendar App
- *
- * @copyright 2023, 2024 Claus-Justus Heine <himself@claus-justus-heine.de>
- *
- * @author Claus-Justus Heine <himself@claus-justus-heine.de>
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE
- * License as published by the Free Software Foundation; either
- * version 3 of the License, or any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU AFFERO GENERAL PUBLIC LICENSE for more details.
- *
- * You should have received a copy of the GNU Affero General Public
- * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
- *
+ * SPDX-FileCopyrightText: 2026 Nextcloud GmbH and Nextcloud contributors
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 namespace OCA\Calendar\Service;
 
-use OCP\AppFramework\Http;
-use OCP\IL10N;
-use Psr\Log\LoggerInterface;
-use OCP\SystemTag\ISystemTagManager;
-use OCP\SystemTag\ISystemTag;
-use OCP\IDBConnection;
-use OCP\DB\QueryBuilder\IQueryBuilder;
-use OCP\Calendar\IManager as ICalendarManager;
 use OCP\Calendar\ICalendarQuery;
-use OCP\Calendar\ICalendar;
+use OCP\Calendar\IManager as ICalendarManager;
+use OCP\SystemTag\ISystemTag;
+use OCP\SystemTag\ISystemTagManager;
 
 class CategoriesService {
-	/** @var null|string */
-	private $userId;
+	private const MAX_RESULTS = 50;
+	private const MAX_EVENTS_PER_CALENDAR = 20;
+	private const MIN_SEARCH_LENGTH = 2;
+	private const MAX_SEARCH_LENGTH = 100;
 
-	/** @var ICalendarManager */
-	private $calendarManager;
-
-	/** @var ISystemTagManager */
-	private $systemTagManager;
-
-	/** @var IDBConnection */
-	private $db;
-
-	/** @var LoggerInterface */
-	private $logger;
-
-	/** @var IL10N */
-	private $l;
-
-	private const CALENDAR_OBJECT_PROPERTIES_TABLE = 'calendarobjects_props';
-
-	public function __construct(?string $userId,
-								ICalendarManager $calendarManager,
-								ISystemTagManager $systemTagManager,
-								IDBConnection $db,
-								LoggerInterface $logger,
-								IL10N $l10n) {
-		$this->userId = $userId;
-		$this->calendarManager = $calendarManager;
-		$this->systemTagManager = $systemTagManager;
-		$this->db = $db;
-		$this->logger = $logger;
-		$this->l = $l10n;
+	public function __construct(
+		private ?string $userId,
+		private ICalendarManager $calendarManager,
+		private ISystemTagManager $systemTagManager,
+	) {
 	}
 
 	/**
-	 * This is a simplistic brute-force extraction of all already used
-	 * categories from all events accessible to the currently logged in user.
+	 * Search used event categories and assignable collaborative tags.
 	 *
-	 * @return array
+	 * The public calendar search API limits matching events per calendar, not
+	 * globally. System-tag search has no result-limit parameter.
+	 *
+	 * @return list<array{label: string, value: string, source: string}>
 	 */
-	private function getUsedCategories(): array
-	{
-		if (empty($this->userId)) {
+	public function searchCategories(string $search): array {
+		$search = trim($search);
+		if ($this->userId === null || mb_strlen($search) < self::MIN_SEARCH_LENGTH) {
 			return [];
 		}
-		$principalUri = 'principals/users/' . $this->userId;
-		$calendars = $this->calendarManager->getCalendarsForPrincipal('principals/users/' . $this->userId);
-		$count = count($calendars);
-		if ($count === 0) {
-			return [];
-		}
+		$search = mb_substr($search, 0, self::MAX_SEARCH_LENGTH);
 
-		$categories = [];
-		$query = $this->calendarManager->newQuery($principalUri);
-		$query->addSearchProperty(ICalendarQuery::SEARCH_PROPERTY_CATEGORIES);
-		$calendarObjects = $this->calendarManager->searchForPrincipal($query);
-		foreach ($calendarObjects as $objectInfo) {
-			foreach ($objectInfo['objects'] as $calendarObject) {
-				if (isset($calendarObject['CATEGORIES'])) {
-					$categories[] = explode(',', $calendarObject['CATEGORIES'][0][0]);
-				}
-			}
-		}
-
-		// Avoid injecting "broken" categories into the UI (avoid empty
-		// categories and categories surrounded by spaces)
-		$categories = array_filter(array_map(fn($label) => trim($label), array_unique(array_merge(...$categories))));
-
-		return $categories;
-	}
-
-	/**
-	 * Return a grouped array with all previously used categories, all system
-	 * tags and all categories found the the iCalendar RFC.
-	 *
-	 * @return array
-	 */
-	public function getCategories(): array {
-		$systemTags = $this->systemTagManager->getAllTags(visibilityFilter: true);
-
-		$systemTagCategoryLabels = [];
+		$results = [];
+		$seen = [];
+		$systemTags = $this->systemTagManager->getAllTags(true, $search);
 		/** @var ISystemTag $systemTag */
 		foreach ($systemTags as $systemTag) {
 			if (!$systemTag->isUserAssignable() || !$systemTag->isUserVisible()) {
 				continue;
 			}
-			$systemTagCategoryLabels[] = $systemTag->getName();
+			$this->addResult($results, $seen, $systemTag->getName(), 'collaborative');
+			if (count($results) >= self::MAX_RESULTS) {
+				return $results;
+			}
 		}
-		sort($systemTagCategoryLabels);
-		$systemTagCategoryLabels = array_values(array_filter(array_unique($systemTagCategoryLabels)));
 
-		$rfcCategoryLabels = [
-			$this->l->t('Anniversary'),
-			$this->l->t('Appointment'),
-			$this->l->t('Business'),
-			$this->l->t('Education'),
-			$this->l->t('Holiday'),
-			$this->l->t('Meeting'),
-			$this->l->t('Miscellaneous'),
-			$this->l->t('Non-working hours'),
-			$this->l->t('Not in office'),
-			$this->l->t('Personal'),
-			$this->l->t('Phone call'),
-			$this->l->t('Sick day'),
-			$this->l->t('Special occasion'),
-			$this->l->t('Travel'),
-			$this->l->t('Vacation'),
+		$query = $this->calendarManager->newQuery('principals/users/' . $this->userId);
+		$query->addSearchProperty(ICalendarQuery::SEARCH_PROPERTY_CATEGORIES);
+		$query->addType('VEVENT');
+		$query->setSearchPattern($search);
+		$query->setLimit(self::MAX_EVENTS_PER_CALENDAR);
+
+		foreach ($this->calendarManager->searchForPrincipal($query) as $event) {
+			foreach ($event['objects'] ?? [] as $object) {
+				foreach ($object['CATEGORIES'] ?? [] as $property) {
+					$value = $property[0] ?? null;
+					if (!is_string($value)) {
+						continue;
+					}
+
+					$categories = $this->splitCategoryValue($value);
+					foreach ($categories as $category) {
+						if (mb_stripos($category, $search) === false) {
+							continue;
+						}
+						$this->addResult($results, $seen, $category, 'custom');
+						if (count($results) >= self::MAX_RESULTS) {
+							return $results;
+						}
+					}
+				}
+			}
+		}
+
+		return $results;
+	}
+
+	/**
+	 * The public calendar search result does not distinguish a single
+	 * comma-containing category from multiple categories. Skip those ambiguous
+	 * values rather than suggesting incorrect category names.
+	 *
+	 * @return list<string>
+	 */
+	private function splitCategoryValue(string $value): array {
+		if (str_contains($value, ',') && !str_contains($value, '\\,')) {
+			return [];
+		}
+
+		$categories = [];
+		$category = '';
+		$escaped = false;
+		for ($i = 0, $length = strlen($value); $i < $length; $i++) {
+			$character = $value[$i];
+			if ($escaped) {
+				$category .= $character === 'n' || $character === 'N' ? "\n" : $character;
+				$escaped = false;
+			} elseif ($character === '\\') {
+				$escaped = true;
+			} elseif ($character === ',') {
+				$categories[] = $category;
+				$category = '';
+			} else {
+				$category .= $character;
+			}
+		}
+		if ($escaped) {
+			$category .= '\\';
+		}
+		$categories[] = $category;
+
+		return array_values(array_filter(array_map('trim', $categories), static fn (string $category): bool => $category !== ''));
+	}
+
+	/**
+	 * @param list<array{label: string, value: string, source: string}> $results
+	 * @param array<string, true> $seen
+	 */
+	private function addResult(array &$results, array &$seen, string $label, string $source): void {
+		$label = trim($label);
+		$key = mb_strtolower($label);
+		if ($label === '' || isset($seen[$key])) {
+			return;
+		}
+
+		$seen[$key] = true;
+		$results[] = [
+			'label' => $label,
+			'value' => $label,
+			'source' => $source,
 		];
-		sort($rfcCategoryLabels);
-		$rfcCategoryLabels = array_values(array_filter(array_unique($rfcCategoryLabels)));
-
-		$standardCategories = array_merge($systemTagCategoryLabels, $rfcCategoryLabels);
-		$customCategoryLabels = array_values(array_filter($this->getUsedCategories(), fn($label) => !in_array($label, $standardCategories)));
-
-		// $categories = [
-		// 	[
-		// 		'group' => $this->l->t('Custom Categories'),
-		// 		'options' => array_map(fn(string $label) => [ 'label' => $label, 'value' => $label ], $customCategoryLabels),
-		// 	],
-		// 	[
-		// 		'group' => $this->l->t('Collaborative Tags'),
-		// 		'options' => array_map(fn(string $label) => [ 'label' => $label, 'value' => $label ], $systemTagCategoryLabels),
-		// 	],
-		// 	[
-		// 		'group' => $this->l->t('Standard Categories'),
-		// 		'options' => array_map(fn(string $label) => [ 'label' => $label, 'value' => $label ], $rfcCategoryLabels),
-		// 	],
-		// ];
-
-		// As VueSelect still does not support option groups, provide the
-		// options as flat arrays and leave it to Vue to style the headings
-		$categories = array_merge(
-			[ [ 'label' => $this->l->t('Custom Categories'), 'value' => null, 'isGroupHeading' => true, ], ],
-			array_map(fn(string $label) => [ 'label' => $label, 'value' => $label, 'isGroupHeading' => false, ], $customCategoryLabels),
-			[ [ 'label' => $this->l->t('Collaborative Tags'), 'value' => null, 'isGroupHeading' => true, ], ],
-			array_map(fn(string $label) => [ 'label' => $label, 'value' => $label, 'isGroupHeading' => false, ], $systemTagCategoryLabels),
-			[ [ 'label' => $this->l->t('Standard Categories'), 'value' => null, 'isGroupHeading' => true, ] ],
-			array_map(fn(string $label) => [ 'label' => $label, 'value' => $label, 'isGroupHeading' => false, ], $rfcCategoryLabels),
-		);
-
-		return $categories;
 	}
 }
