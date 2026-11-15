@@ -37,6 +37,7 @@ return [
 		['name' => 'contact#searchAttendee', 'url' => '/v1/autocompletion/attendee', 'verb' => 'POST'],
 		['name' => 'contact#searchLocation', 'url' => '/v1/autocompletion/location', 'verb' => 'POST'],
 		['name' => 'contact#searchPhoto', 'url' => '/v1/autocompletion/photo', 'verb' => 'POST'],
+		['name' => 'category#searchCategories', 'url' => '/v1/autocompletion/categories', 'verb' => 'POST'],
 		// Circles
 		['name' => 'contact#getCircleMembers', 'url' => '/v1/circles/getmembers', 'verb' => 'GET'],
 		// Contact Groups

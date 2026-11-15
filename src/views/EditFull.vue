@@ -240,6 +240,8 @@
 							:coloredOptions="true"
 							:isReadOnly="isReadOnly"
 							:propModel="rfcProps.categories"
+							:customLabelHeading="t('calendar', 'Custom Categories')"
+							:collaborativeLabelHeading="t('calendar', 'Collaborative Tags')"
 							:value="categories"
 							@addSingleValue="addCategory"
 							@removeSingleValue="removeCategory" />
