@@ -1105,7 +1105,7 @@ const mixin = {
 					category,
 				})
 			}
-			if (context.title) {
+			if (!this.calendarObjectInstance.title && context.title) {
 				this.calendarObjectInstanceStore.changeTitle({
 					calendarObjectInstance: this.calendarObjectInstance,
 					title: context.title,
