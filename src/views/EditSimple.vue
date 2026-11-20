@@ -393,7 +393,7 @@ export default {
 	mixins: [
 		EditorMixin,
 	],
-	...routerGuards,
+	// ...routerGuards,
 
 	props: {
 		dark: {
