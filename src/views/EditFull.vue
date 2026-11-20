@@ -449,7 +449,7 @@ export default {
 	mixins: [
 		EditorMixin,
 	],
-	...routerGuards,
+	// ...routerGuards,
 
 	data() {
 		return {
