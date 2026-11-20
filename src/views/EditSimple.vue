@@ -347,7 +347,7 @@ import PropertyTitleTimePicker
 import Repeat from '@/components/Editor/Repeat/Repeat.vue'
 import PropertySelectMultiple from '@/components/Editor/Properties/PropertySelectMultiple.vue'
 import SaveButtons from '@/components/Editor/SaveButtons.vue'
-import EditorMixin from '@/mixins/EditorMixin.js'
+import EditorMixin, { routerGuards } from '@/mixins/EditorMixin.js'
 import useCalendarObjectInstanceStore from '@/store/calendarObjectInstance.js'
 import useSettingsStore from '@/store/settings.js'
 import useWidgetStore from '@/store/widget.js'
@@ -393,6 +393,7 @@ export default {
 	mixins: [
 		EditorMixin,
 	],
+	...routerGuards,
 
 	props: {
 		dark: {

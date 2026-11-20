@@ -31,7 +31,7 @@ import { getDefaultEndDateForNewEvent, getDefaultStartDateForNewEvent, getPrefix
  *
  * See inline for more documentation
  */
-export default {
+const mixin = {
 	props: {
 		// Whether or not the calendar is embedded in a widget
 		isWidget: {
@@ -1119,6 +1119,10 @@ export default {
 			}
 		},
 	},
+}
+
+// In-component router guards cannot be defined by mixins
+export const routerGuards = {
 	/**
 	 * This is executed before entering the Editor routes
 	 *
@@ -1304,3 +1308,5 @@ export default {
 		}
 	},
 }
+
+export default mixin
