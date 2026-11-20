@@ -614,7 +614,7 @@ export default {
 		/**
 		 * Closes the editor and returns to normal calendar-view
 		 */
-		closeEditor() {
+		async closeEditor() {
 			if (this.isWidget) {
 				this.widgetStore.closeWidgetEventDetails()
 				return
@@ -630,10 +630,14 @@ export default {
 
 			const targetRouteName = getPrefixedRoute(this.$route?.name ?? 'CalendarView', 'CalendarView')
 
-			this.$router.push({
-				name: targetRouteName,
-				params,
-			})
+			try {
+				await this.$router.push({
+					name: targetRouteName,
+					params,
+				})
+			} catch (error) {
+				console.error('Caught an error returning to the base view', error)
+			}
 
 			this.calendarObjectInstanceStore.resetCalendarObjectInstanceObjectIdAndRecurrenceId()
 		},
