@@ -486,6 +486,7 @@ export default {
 				const start = parseInt(this.$route?.params.dtstart ?? getDefaultStartDateForNewEvent(), 10)
 				const end = parseInt(this.$route?.params.dtend ?? getDefaultEndDateForNewEvent(), 10)
 				const timezoneId = this.settingsStore.getResolvedTimezone
+				const context = this.getRouteContext(this.$route)
 
 				await this.calendarObjectInstanceStore.getCalendarObjectInstanceForNewEvent({
 					isAllDay,
@@ -496,6 +497,7 @@ export default {
 
 				// Set the calendarId from the created calendar object
 				if (this.calendarObject) {
+					this.injectRouteContext(context)
 					this.calendarId = this.calendarObject.calendarId
 					this.addDelegatorAsAttendeeIfNeeded(this.selectedCalendar)
 				}
@@ -1066,6 +1068,41 @@ export default {
 				})
 			})
 		},
+
+		getRouteContext(route) {
+			let context
+			try {
+				context = JSON.parse(atob(route.params.context))
+			} catch (error) {
+				if (route.params.context) {
+					console.error('Unable to decode given context parameter', { error, route })
+				}
+				context = {}
+			}
+			return context
+		},
+
+		injectRouteContext(context) {
+			const categories = [...new Set([...(context.categories || [])])]
+			for (const category of categories) {
+				this.calendarObjectInstanceStore.addCategory({
+					calendarObjectInstance: this.calendarObjectInstance,
+					category,
+				})
+			}
+			if (context.title) {
+				this.calendarObjectInstanceStore.changeTitle({
+					calendarObjectInstance: this.calendarObjectInstance,
+					title: context.title,
+				})
+			}
+			if (context.calendarId) {
+				if (!this.calendarsStore.getCalendarById(context.calendarId)) {
+					throw Error(`Calendar does not exist: ${context.calendarId} (${atob(context.calendarId)})`)
+				}
+				this.calendarObject.calendarId = context.calendarId
+			}
+		},
 	},
 	/**
 	 * This is executed before entering the Editor routes
@@ -1083,11 +1120,16 @@ export default {
 				const start = parseInt(to.params.dtstart, 10)
 				const end = parseInt(to.params.dtend, 10)
 				const timezoneId = vm.settingsStore.getResolvedTimezone
+				const context = vm.getRouteContext(to)
 
 				try {
 					await vm.loadingCalendars()
 					await vm.calendarObjectInstanceStore.getCalendarObjectInstanceForNewEvent({ isAllDay, start, end, timezoneId })
-					vm.calendarId = vm.calendarObject.calendarId
+
+					if (vm.calendarObject) {
+						vm.injectRouteContext(context)
+						vm.calendarId = vm.calendarObject.calendarId
+					}
 				} catch (error) {
 					logger.debug(error)
 					vm.isError = true
