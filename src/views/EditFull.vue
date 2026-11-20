@@ -3,7 +3,7 @@
   - SPDX-License-Identifier: AGPL-3.0-or-later
 -->
 
-<template>
+<template><div>
 	<NcModal
 		v-if="calendarObjectInstance"
 		v-model="showFullModal"
@@ -352,7 +352,7 @@
 			:buttons="cancelButtons"
 			@update:open="showCancelDialog = $event" />
 	</NcModal>
-</template>
+</div></template>
 
 <script>
 import IconCancel from '@mdi/svg/svg/cancel.svg?raw'
