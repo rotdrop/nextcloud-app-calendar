@@ -398,7 +398,7 @@ import PropertyTitleTimePicker from '@/components/Editor/Properties/PropertyTitl
 import Repeat from '@/components/Editor/Repeat/Repeat.vue'
 import ResourceList from '@/components/Editor/Resources/ResourceList.vue'
 import SaveButtons from '@/components/Editor/SaveButtons.vue'
-import EditorMixin from '@/mixins/EditorMixin.js'
+import EditorMixin, { routerGuards } from '@/mixins/EditorMixin.js'
 import { shareFile } from '@/services/attachmentService.js'
 import getTimezoneManager from '@/services/timezoneDataProviderService.js'
 import useCalendarObjectInstanceStore from '@/store/calendarObjectInstance.js'
@@ -449,6 +449,7 @@ export default {
 	mixins: [
 		EditorMixin,
 	],
+	...routerGuards,
 
 	data() {
 		return {
